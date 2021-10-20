@@ -224,7 +224,7 @@ class Cqdg_novo_escala(QgsProcessingAlgorithm):
             'INPUT': outputs['Classe_d']['OUTPUT'],
             'OUTPUT': parameters['Camada_final']
         }
-        outputs['DescartarCampos'] = processing.run('native:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['DescartarCampos'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
         results['Camada_final'] = outputs['DescartarCampos']['OUTPUT']
         return results
 
