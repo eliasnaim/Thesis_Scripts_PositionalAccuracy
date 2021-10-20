@@ -15,46 +15,14 @@ class Cqdg_novo_escala(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterVectorLayer('Entrecomosdadosaseremavaliados', 'Entre com os dados a serem avaliados', types=[QgsProcessing.TypeVectorPoint], defaultValue=None))
         self.addParameter(QgsProcessingParameterNumber('EntrecomodenominadordeEscaladesejado', 'Entre com o denominador de Escala', type=QgsProcessingParameterNumber.Double, minValue=0, maxValue=1e+09, defaultValue=1000))
         self.addParameter(QgsProcessingParameterBoolean('VERBOSE_LOG', 'Log detalhado', optional=True, defaultValue=False))
-        self.addParameter(QgsProcessingParameterFeatureSink('Camada_final', 'Camada_Final', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
+        self.addParameter(QgsProcessingParameterFeatureSink('Resultado', 'Resultado', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, supportsAppend=True, defaultValue=None))
 
     def processAlgorithm(self, parameters, context, model_feedback):
         # Use a multi-step feedback, so that individual child algorithm progress reports are adjusted for the
         # overall progress through the model
-        feedback = QgsProcessingMultiStepFeedback(13, model_feedback)
+        feedback = QgsProcessingMultiStepFeedback(18, model_feedback)
         results = {}
         outputs = {}
-
-        # E_ref
-        alg_params = {
-            'FIELD_LENGTH': 10,
-            'FIELD_NAME': 'E_ref',
-            'FIELD_PRECISION': 10,
-            'FIELD_TYPE': 0,
-            'FORMULA': '$x',
-            'INPUT': parameters['EntrecomosdadosdeReferncia'],
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['E_ref'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(1)
-        if feedback.isCanceled():
-            return {}
-
-        # N_ref
-        alg_params = {
-            'FIELD_LENGTH': 10,
-            'FIELD_NAME': 'N_ref',
-            'FIELD_PRECISION': 10,
-            'FIELD_TYPE': 0,
-            'FORMULA': '$y',
-            'INPUT': outputs['E_ref']['OUTPUT'],
-            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-        }
-        outputs['N_ref'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        feedback.setCurrentStep(2)
-        if feedback.isCanceled():
-            return {}
 
         # E_aval
         alg_params = {
@@ -68,7 +36,7 @@ class Cqdg_novo_escala(QgsProcessingAlgorithm):
         }
         outputs['E_aval'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(3)
+        feedback.setCurrentStep(1)
         if feedback.isCanceled():
             return {}
 
@@ -83,6 +51,38 @@ class Cqdg_novo_escala(QgsProcessingAlgorithm):
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
         outputs['N_aval'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(2)
+        if feedback.isCanceled():
+            return {}
+
+        # E_ref
+        alg_params = {
+            'FIELD_LENGTH': 10,
+            'FIELD_NAME': 'E_ref',
+            'FIELD_PRECISION': 10,
+            'FIELD_TYPE': 0,
+            'FORMULA': '$x',
+            'INPUT': parameters['EntrecomosdadosdeReferncia'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['E_ref'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(3)
+        if feedback.isCanceled():
+            return {}
+
+        # N_ref
+        alg_params = {
+            'FIELD_LENGTH': 10,
+            'FIELD_NAME': 'N_ref',
+            'FIELD_PRECISION': 10,
+            'FIELD_TYPE': 0,
+            'FORMULA': '$y',
+            'INPUT': outputs['E_ref']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['N_ref'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
         feedback.setCurrentStep(4)
         if feedback.isCanceled():
@@ -218,14 +218,74 @@ class Cqdg_novo_escala(QgsProcessingAlgorithm):
         if feedback.isCanceled():
             return {}
 
-        # Descartar campo(s)
+        # 1
         alg_params = {
-            'COLUMN': ['\'','ID_2','N_ref','E_ref','N_aval','E_aval','va','\''],
+            'COLUMN': ['ID_2'],
             'INPUT': outputs['Classe_d']['OUTPUT'],
-            'OUTPUT': parameters['Camada_final']
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
-        outputs['DescartarCampos'] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-        results['Camada_final'] = outputs['DescartarCampos']['OUTPUT']
+        outputs[''] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(13)
+        if feedback.isCanceled():
+            return {}
+
+        # 2
+        alg_params = {
+            'COLUMN': ['N_ref'],
+            'INPUT': outputs['']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs[''] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(14)
+        if feedback.isCanceled():
+            return {}
+
+        # 3
+        alg_params = {
+            'COLUMN': ['E_ref'],
+            'INPUT': outputs['']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs[''] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(15)
+        if feedback.isCanceled():
+            return {}
+
+        # 4
+        alg_params = {
+            'COLUMN': ['N_aval'],
+            'INPUT': outputs['']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs[''] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(16)
+        if feedback.isCanceled():
+            return {}
+
+        # 5
+        alg_params = {
+            'COLUMN': ['E_aval'],
+            'INPUT': outputs['']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs[''] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(17)
+        if feedback.isCanceled():
+            return {}
+
+        # 6
+        alg_params = {
+            'COLUMN': ['va'],
+            'INPUT': outputs['']['OUTPUT'],
+            'OUTPUT': parameters['Resultado']
+        }
+        outputs[''] = processing.run('qgis:deletecolumn', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        results['Resultado'] = outputs['']['OUTPUT']
         return results
 
     def name(self):
