@@ -38,22 +38,39 @@ class Modelo(QgsProcessingAlgorithm):
         if feedback.isCanceled():
             return {}
 
-        # Dz
+        # Dz_cal
         alg_params = {
             'FIELD_LENGTH': 10,
-            'FIELD_NAME': 'Dz',
+            'FIELD_NAME': 'Dz_cal',
             'FIELD_PRECISION': 10,
             'FIELD_TYPE': 0,  # Float
             'FORMULA': '\"Ztest\" - \"Zref\"',
             'INPUT': outputs['Unio']['OUTPUT'],
             'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
         }
-        outputs['Dz'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+        outputs['Dz_cal'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
         feedback.setCurrentStep(2)
         if feedback.isCanceled():
             return {}
+            
+        # Dz
+        alg_params = {
+            'FIELD_LENGTH': 10,
+            'FIELD_NAME': 'Dz',
+            'FIELD_PRECISION': 10,
+            'FIELD_TYPE': 0,  # Float
+            'FORMULA': 'abs(\"Ztest\" - \"Zref\")',
+            'INPUT': outputs['Dz_cal']['OUTPUT'],
+            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+        }
+        outputs['Dz'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
+        feedback.setCurrentStep(3)
+        if feedback.isCanceled():
+            return {}
+            
+            
         # EMQ
         alg_params = {
             'FIELD_LENGTH': 10,
@@ -66,7 +83,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs['Emq'] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(3)
+        feedback.setCurrentStep(4)
         if feedback.isCanceled():
             return {}
 
@@ -82,7 +99,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs[''] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(4)
+        feedback.setCurrentStep(5)
         if feedback.isCanceled():
             return {}
 
@@ -98,7 +115,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs[''] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(5)
+        feedback.setCurrentStep(6)
         if feedback.isCanceled():
             return {}
 
@@ -114,7 +131,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs[''] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(6)
+        feedback.setCurrentStep(7)
         if feedback.isCanceled():
             return {}
 
@@ -130,7 +147,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs[''] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(7)
+        feedback.setCurrentStep(8)
         if feedback.isCanceled():
             return {}
 
@@ -146,7 +163,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs[''] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(8)
+        feedback.setCurrentStep(9)
         if feedback.isCanceled():
             return {}
 
@@ -162,7 +179,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs[''] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(9)
+        feedback.setCurrentStep(10)
         if feedback.isCanceled():
             return {}
 
@@ -178,7 +195,7 @@ class Modelo(QgsProcessingAlgorithm):
         }
         outputs[''] = processing.run('native:fieldcalculator', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
-        feedback.setCurrentStep(10)
+        feedback.setCurrentStep(11)
         if feedback.isCanceled():
             return {}
 
